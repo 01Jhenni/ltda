@@ -1,17 +1,16 @@
-streamlit==1.32.0
-python-dotenv==1.0.1
-Pillow==10.2.0
+streamlit
+python-dotenv
+Pillow
 
-supabase==2.3.5
-httpx==0.24.1
-gotrue==1.0.1
-pydantic==1.10.12  # Evita erro com Supabase
+supabase
+httpx
+gotrue
+pydantic
+pandas
+numpy
+plotly
+matplotlib
+seaborn
 
-pandas==2.2.1
-numpy==1.26.4
-plotly==5.19.0
-matplotlib==3.8.2
-seaborn==0.13.2
-
-requests==2.31.0
-urllib3==2.2.1
+requests
+urllib3
