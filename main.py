@@ -13,7 +13,6 @@ import webbrowser
 import urllib.parse
 from datetime import date, datetime
 from PIL import Image
-from utils import open_outlook
 
 load_dotenv()
 
