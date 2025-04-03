@@ -1,25 +1,17 @@
-# Streamlit e Dependências
 streamlit==1.32.0
 python-dotenv==1.0.1
 Pillow==10.2.0
 
-# Banco de Dados e APIs
 supabase==2.3.5
 httpx==0.24.1
 gotrue==1.0.1
+pydantic==1.10.12  # Evita erro com Supabase
 
-# Manipulação de Dados
 pandas==2.2.1
 numpy==1.26.4
-
-# Visualização de Dados
 plotly==5.19.0
 matplotlib==3.8.2
 seaborn==0.13.2
 
-# Ferramentas Úteis
 requests==2.31.0
 urllib3==2.2.1
-
-
-
