@@ -9,3 +9,7 @@ gotrue==1.0.1
 httpx==0.24.1
 python-dotenv==1.0.0
 streamlit==1.30.0
+git add requirements.txt
+git commit -m "Adicionando dependências"
+git push origin main
+
