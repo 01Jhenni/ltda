@@ -431,3 +431,36 @@ def export_data(registros):
 # Função para hashear senha
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest() 
+
+
+
+
+
+
+import os
+import urllib.parse
+import webbrowser
+
+def open_outlook(email_to, subject, body, attachment_path=None):
+    """
+    Abre o Outlook para enviar um e-mail automaticamente preenchido.
+
+    Parâmetros:
+        email_to (str): E-mail do destinatário.
+        subject (str): Assunto do e-mail.
+        body (str): Corpo da mensagem.
+        attachment_path (str, opcional): Caminho do arquivo a ser anexado.
+    """
+    subject = urllib.parse.quote(subject)
+    body = urllib.parse.quote(body)
+    
+    # Formatar o link para abrir no Outlook
+    mailto_link = f"mailto:{email_to}?subject={subject}&body={body}"
+    
+    # Abrir o link no navegador padrão (isso abrirá o Outlook se estiver configurado)
+    webbrowser.open(mailto_link)
+
+    # Exibir uma mensagem se houver anexo (não pode anexar diretamente)
+    if attachment_path:
+        print(f"⚠️ O anexo '{attachment_path}' deve ser adicionado manualmente.")
+
