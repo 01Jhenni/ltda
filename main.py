@@ -540,89 +540,80 @@ if menu == "Organizar Arquivos Fiscais":
 elif menu == "Controle Importação":
     st.title("📑 Importação")
     
-    # Verificar se o usuário está autenticado
     if not st.session_state.get("logged_in"):
         st.error("❌ Você precisa estar logado para registrar importações.")
         st.stop()
-    
+
     with st.form("registro_form"):
         empresa_filtro = st.selectbox("Nome da empresa", st.session_state.empresas)
-        tipo_nota = st.selectbox("Tipo de Nota", ["NFE entrada", "NFE saída", "CTE entrada", "CTE saída", "CTE cancelado", "SPED", "NFS tomado", "NFS prestado", "Planilha", "NFCE saída"])
+        tipo_nota = st.selectbox("Tipo de Nota", [
+            "NFE entrada", "NFE saída", "CTE entrada", "CTE saída", "CTE cancelado",
+            "SPED", "NFS tomado", "NFS prestado", "Planilha", "NFCE saída"
+        ])
         erro = st.text_area("Erro (se houver)")
-        arquivo = st.file_uploader("Anexar arquivo", type=["png", "jpeg", "jpg", "pdf", "xml", "txt", "xlsx", "xls", "csv", "zip"])
+        arquivo = st.file_uploader("Anexar arquivo", type=[
+            "png", "jpeg", "jpg", "pdf", "xml", "txt", "xlsx", "xls", "csv", "zip"
+        ])
         submit = st.form_submit_button("Registrar")
-        
+
         if submit:
             try:
                 data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 arquivo_path = ""
+                public_url = None
                 upload_success = True
-                
+
                 if arquivo:
-                    # Criar um nome único para o arquivo
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     nome_arquivo = f"{timestamp}_{arquivo.name}"
                     arquivo_path = f"arquivos/{empresa_filtro}/{nome_arquivo}"
-                    
-                    # Criar diretório temporário
-                    temp_dir = os.path.join(os.getcwd(), "temp_uploads")
-                    os.makedirs(temp_dir, exist_ok=True)
-                    
-                    # Salvar arquivo temporariamente
-                    temp_path = os.path.join(temp_dir, nome_arquivo)
-                    with open(temp_path, "wb") as f:
-                        f.write(arquivo.getvalue())
-                    
-                    # Upload do arquivo para o Supabase Storage
+
+                    # Upload para o Supabase com upsert
                     try:
                         response = supabase.storage.from_("arquivos").upload(
                             arquivo_path,
                             arquivo.getvalue(),
-                            {"content-type": arquivo.type}
+                            {"content-type": arquivo.type},
+                            upsert=True
                         )
-                        
-                        if response.error:
-                            st.error(f"❌ Erro ao salvar arquivo: {response.error.message}")
+
+                        if response.get("error"):
+                            st.error(f"❌ Erro ao salvar arquivo: {response['error']['message']}")
                             upload_success = False
+                        else:
+                            public_url = supabase.storage.from_("arquivos").get_public_url(arquivo_path)['publicUrl']
+
                     except Exception as e:
-                        st.error(f"❌ Erro ao fazer upload do arquivo: {str(e)}")
+                        st.error(f"❌ Erro ao fazer upload: {str(e)}")
                         upload_success = False
-                    finally:
-                        # Limpar arquivo temporário
-                        if os.path.exists(temp_path):
-                            os.remove(temp_path)
-                
+
                 if upload_success:
-                    # Definir status baseado no erro
                     status = "OK" if not erro else "Pendente"
-                    
-                    # Inserir registro no Supabase
+
+                    registro_data = {
+                        "data": data_atual,
+                        "empresa": empresa_filtro,
+                        "tipo_nota": tipo_nota,
+                        "erro": erro,
+                        "arquivo_erro": public_url if erro else None,
+                        "status": status,
+                        "arquivo": public_url if arquivo else None,
+                        "tipo_arquivo": arquivo.type if arquivo else None
+                    }
+
                     try:
-                        registro_data = {
-                            "data": data_atual,
-                            "empresa": empresa_filtro,
-                            "tipo_nota": tipo_nota,
-                            "erro": erro,
-                            "arquivo_erro": arquivo_path if erro else None,
-                            "status": status,
-                            "arquivo": arquivo_path if arquivo else None,
-                            "tipo_arquivo": arquivo.type if arquivo else None
-                        }
-                        
-                        # Tentar inserir o registro diretamente
                         response = supabase.table("registros").insert(registro_data).execute()
-                        
-                        if not response or (hasattr(response, 'error') and response.error):
-                            st.error(f"❌ Erro ao salvar registro: {response.error.message if hasattr(response, 'error') else 'Erro desconhecido'}")
+
+                        if response.get("error"):
+                            st.error(f"❌ Erro ao salvar registro: {response['error']['message']}")
                         else:
                             st.success("✅ Registro salvo com sucesso!")
                             st.rerun()
-                            
                     except Exception as e:
-                        st.error(f"❌ Erro ao salvar registro: {str(e)}")
-                    
+                        st.error(f"❌ Erro ao salvar no banco: {str(e)}")
+
             except Exception as e:
-                st.error(f"❌ Erro ao processar registro: {str(e)}")
+                st.error(f"❌ Erro inesperado: {str(e)}")
 
 elif menu == "Registros Importação":
     st.title("🔍 Buscar Registros")
