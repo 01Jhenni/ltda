@@ -656,7 +656,7 @@ elif menu == "Registros Importação":
                     # Exibir arquivo de erro se existir
                     if row['arquivo_erro']:
                         try:
-                             = supabase.storage.from_("arquivos").download(row['arquivo_erro'])
+                             response = supabase.storage.from_("arquivos").download(row['arquivo_erro'])  # ✅ Corrigido
                             if response:
                                 if row['arquivo_erro'].lower().endswith(('.png', '.jpg', '.jpeg')):
                                     image = Image.open(BytesIO(response))
