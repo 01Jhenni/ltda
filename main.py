@@ -574,7 +574,6 @@ elif menu == "Controle Importação":
                             arquivo_path,
                             arquivo.getvalue(),
                             {"content-type": arquivo.type},
-                            upsert=True
                         )
 
                         if response.get("error"):
@@ -657,7 +656,7 @@ elif menu == "Registros Importação":
                     # Exibir arquivo de erro se existir
                     if row['arquivo_erro']:
                         try:
-                            response = supabase.storage.from_("arquivos").download(row['arquivo_erro'])
+                             = supabase.storage.from_("arquivos").download(row['arquivo_erro'])
                             if response:
                                 if row['arquivo_erro'].lower().endswith(('.png', '.jpg', '.jpeg')):
                                     image = Image.open(BytesIO(response))
